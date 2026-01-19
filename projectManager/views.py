@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from .models import Project
 from .forms import RegistrationForm, LoginForm, ProjectForm, TechnologyForm
 
 
@@ -33,6 +34,15 @@ def create_project(request):
     })
 
 
+def project(request, id):
+    project = Project.objects.all().get(id=id)
+    technologies = project.technologies.all()
+    return render(request, "projectManager/project.html", {
+        "project" : project,
+        "technologies" : technologies,
+    })
+
+
 @login_required
 def add_technology(request):
     if request.method == "POST":
@@ -43,6 +53,17 @@ def add_technology(request):
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def delete_project(request, id):
+    project = Project.objects.all().get(id=id)
+    if request.user!=project.creator:
+        messages.error(request, "You are not the project creator. Only the creator of the project can delete it.")
+        redirect("project", id=project.id)
+    else:
+        Project.objects.delete(project)
+        redirect("home")
 
 
 @login_required

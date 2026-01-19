@@ -20,3 +20,12 @@ body {
     font-size: 2rem;
     font-weight: bolder;
 }
+
+.technology-text {
+    background-color: #dde1e9;
+    border: 1.3px solid #999;
+    font-family: monospace;
+    padding: 4px 5px;
+    border-radius: 3px;
+    margin: 5px;
+}
