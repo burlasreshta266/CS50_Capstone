@@ -1,0 +1,38 @@
+{% extends 'projectManager/layout.html' %}
+{% load static %}
+{% block body %}
+
+<nav class="navbar p-4">
+  <span class="navbar-title">Welcome {{ request.user.username }}!</span>
+  <div class="w-50 text-end">
+    <a class="btn btn-main m-2 w-25" href="{% url 'create_project' %}">Create Project</a>
+    <a class="btn btn-danger m-2 w-25" href="{% url 'logout' %}">Logout</a>
+  </div>
+</nav>
+
+<main class="m-2">
+  <div class="container">
+    <div class="row gx-2">
+
+      {% for project in projects %}
+      <div id="project-{{ project.id }}" class="card col-12 col-md-4">
+        <div class="card-header">
+          <h5>{{ project.title }}</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">{{ project.short_description }}</li>
+          {% if project.status == "ongoing" %}
+          <li class="list-group-item">🔴 {{ project.status }}</li>
+          {% else %}
+          <li class="list-group-item">🟢 {{ project.status }}</li>
+          {% endif %}
+        </ul>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</main>
+
+
+{% endblock %}

@@ -2,7 +2,13 @@
 {% load static %}
 {% block body %}
 
-<h1>Home Page </h1>
-
+<main class="d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+        <h1 class="m-3">Welcome to Project Manager</h1>
+        <p class="m-3">Manage your projects efficiently.</p>
+        <a href="{% url 'login' %}" class="btn btn-main w-25 m-3">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-main w-25 m-3">Register</a>
+    </div>
+</main>
 
 {% endblock %}

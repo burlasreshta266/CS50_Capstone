@@ -1,5 +1,46 @@
 from django import forms
 from django.contrib.auth.models import User
+from .models import Project, Technology
+
+
+class ProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ['title', 'short_description', 'long_description', 'status', 'technologies']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control w-100',
+                'placeholder': 'Enter project title'
+            }),
+            'short_description': forms.TextInput(attrs={
+                'class': 'form-control w-100',
+                'placeholder': 'Enter short description'
+            }),
+            'long_description': forms.Textarea(attrs={
+                'class': 'form-control w-100',
+                'placeholder': 'Enter detailed description',
+                'rows': 4
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-control w-100',
+            }),
+            'technologies': forms.SelectMultiple(attrs={
+                'class': 'form-control w-100',
+            })
+        }
+
+
+class TechnologyForm(forms.ModelForm):
+    class Meta:
+        model = Technology
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter new technology name',
+                'id': 'new-tech-name'  # ID for easy JS access
+            })
+        }
 
 
 class RegistrationForm(forms.ModelForm):
