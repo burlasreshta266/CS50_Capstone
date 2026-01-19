@@ -1,0 +1,20 @@
+body {
+    background-color:#c4d4ea;
+}
+
+.btn-main {
+    background-color: #2d5a9a;
+    color: white;
+}
+.btn-main:hover {
+    background-color: #1b3d6a;
+    color: white;
+}
+
+.login-card {
+    background-color: #f6f9fb;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+}

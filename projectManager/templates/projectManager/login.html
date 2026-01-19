@@ -1,0 +1,44 @@
+{% extends 'projectManager/layout.html' %}
+{% load static %}
+{% block body %}
+
+
+<!-- Messages -->
+   {% if messages %}
+        <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert 
+                {% if message.tags == 'error' %}alert-danger
+                {% else %}alert-{{ message.tags }}
+                {% endif %}
+                alert-dismissible fade show" role="alert">
+
+                {{ message }}
+
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+
+<main class="d-flex justify-content-center align-items-center vh-100">
+    <div class="login-card p-4">
+        <h3 class="mb-2 text-center">Login</h3>
+        <form action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            <fieldset class="mb-3">
+                <label>Username:</label><br>
+                {{ form.username }}
+            </fieldset>
+            <fieldset class="mb-4">
+                <label>Password:</label><br>
+                {{ form.password }}
+            </fieldset>
+            <input type="submit" value="Login" class="btn btn-main w-100">
+        </form>
+        <p class="mt-4 text-center">New here! <a href="{% url 'register' %}">Register</a></p>
+    </div>
+</main>
+
+{% endblock %}
