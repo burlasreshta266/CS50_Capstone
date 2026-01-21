@@ -29,3 +29,10 @@ body {
     border-radius: 3px;
     margin: 5px;
 }
+
+.task-btn {
+    background-color: transparent;
+    border: none;
+    text-decoration: none;
+    color: black;
+}

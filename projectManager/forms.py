@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Project, Technology
+from .models import Project, Technology, Task
 
 
 class ProjectForm(forms.ModelForm):
@@ -40,6 +40,16 @@ class TechnologyForm(forms.ModelForm):
                 'placeholder': 'Enter new technology name',
                 'id': 'new-tech-name'  # ID for easy JS access
             })
+        }
+
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['title', 'deadline']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'deadline': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
         }
 
 

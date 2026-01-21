@@ -2,9 +2,10 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib import auth
+from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from .models import Project
-from .forms import RegistrationForm, LoginForm, ProjectForm, TechnologyForm
+from .models import Project, Task
+from .forms import RegistrationForm, LoginForm, ProjectForm, TechnologyForm, TaskForm
 
 
 def index(request):
@@ -37,10 +38,106 @@ def create_project(request):
 def project(request, id):
     project = Project.objects.all().get(id=id)
     technologies = project.technologies.all()
+    tasks = project.tasks.all()
+    task_form = TaskForm()
     return render(request, "projectManager/project.html", {
         "project" : project,
         "technologies" : technologies,
+        "tasks" : tasks,
+        "task_form": task_form,
     })
+
+
+@login_required
+def edit_project(request, id):
+    project = Project.objects.get(id=id)
+
+    if request.user != project.creator:
+        messages.error(request, "You are not authorized to edit this project.")
+        return redirect('project', id=id)
+
+    if request.method == "POST":
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Project updated successfully!")
+            return redirect('project', id=id)
+    else:
+        form = ProjectForm(instance=project)
+
+    tech_form = TechnologyForm()
+
+    return render(request, "projectManager/edit_project.html", {
+        "form": form,
+        "tech_form": tech_form,
+        "project": project
+    })
+
+
+@require_POST
+@login_required
+def mark_project_complete(request, id):
+    project = Project.objects.get(id=id)
+    
+    if request.user != project.creator:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    project.status = 'completed'
+    project.save()
+    
+    return JsonResponse({
+        'success': True,
+        'status': project.status
+    })
+
+
+@require_POST
+def mark_task_complete(request, id):
+    task = Task.objects.all().get(id=id)
+    task.status = 'completed'
+    task.save()
+    return JsonResponse({
+        'curr_status' : task.status
+    })
+
+
+@require_POST
+@login_required
+def add_task(request, id):
+    project = Project.objects.get(id=id)
+    form = TaskForm(request.POST)
+
+    if form.is_valid():
+        task = form.save(commit=False)
+        task.project = project
+        task.save()
+        messages.success(request, "Task added successfully!")
+    else:
+        messages.error(request, "Error adding task. Please check the date format.")
+    
+    return redirect('project', id=id)
+
+
+@require_POST
+def edit_task(request, id):
+    task = Task.objects.get(id=id)
+    form = TaskForm(request.POST, instance=task)
+    
+    if form.is_valid():
+        task = form.save()
+        return JsonResponse({
+            'success': True,
+            'title': task.title,
+            'deadline': task.deadline.strftime("%b. %d, %Y, %I:%M %p") 
+        })
+    return JsonResponse({'success': False, 'errors': form.errors})
+
+
+def delete_task(request, id):
+    task = Task.objects.get(id=id)
+    p_id = task.project.id
+    task.delete()
+    return redirect('project', id=p_id)
 
 
 @login_required
