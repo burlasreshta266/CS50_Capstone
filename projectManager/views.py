@@ -159,8 +159,8 @@ def delete_project(request, id):
         messages.error(request, "You are not the project creator. Only the creator of the project can delete it.")
         redirect("project", id=project.id)
     else:
-        Project.objects.delete(project)
-        redirect("home")
+        project.delete()
+        return redirect("home")
 
 
 @login_required
@@ -172,7 +172,7 @@ def home(request):
 
 
 def logout(request):
-    auth.logout(request, request.user)
+    auth.logout(request)
     return redirect('index')
 
 

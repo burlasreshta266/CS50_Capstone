@@ -10,6 +10,23 @@
     <div class="row">
 
         <section class="col-12 col-lg-8 p-3">
+            <!-- Messages -->
+            {% if messages %}
+                    <div class="container mt-3">
+                    {% for message in messages %}
+                        <div class="alert 
+                            {% if message.tags == 'error' %}alert-danger
+                            {% else %}alert-{{ message.tags }}
+                            {% endif %}
+                            alert-dismissible fade show" role="alert">
+
+                            {{ message }}
+
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
 
             <div class="p-1">
                 <a class="task-btn" href="{% url 'home' %}">🏠︎</a>
