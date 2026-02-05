@@ -1,80 +1,84 @@
 # Project Manager - CS50w Capstone
 
-This is a Project Management web application designed to help users organize software projects, track development technologies, and manage tasks with deadlines. It allows users to create projects, assign specific technology stacks (e.g., Python, JavaScript), and manage a dynamic list of tasks within those projects without constant page reloads.
+Welcome to **Project Manager**! This is my final capstone project for CS50’s Web Programming with Python and JavaScript.
+
+The idea behind this app is pretty simple: as developers, we always have a bunch of side projects going on, and it’s hard to keep track of which tech stack we used for what, or which tasks are still pending. I wanted to build a centralized dashboard where I could organize my software projects, tag them with the specific technologies I used (like Python, React, or AWS), and manage a dynamic list of tasks with real deadlines.
 
 ## Distinctiveness and Complexity
 
-This project satisfies the distinctiveness and complexity requirements for the following reasons:
+I believe this project satisfies the distinctiveness and complexity requirements because focuses on productivity logic and hierarchical data management.
 
-### Distinctiveness
-This project is neither a social network, e-commerce site, nor an encyclopedia. Instead, it is a productivity and organizational tool designed for developers. Unlike the standard course projects (like "Network" or "Commerce"), this application focuses on:
-* **Hierarchical Data Management:** Managing the relationship between Users, Projects, Technologies, and Tasks.
-* **Workflow Tracking:** Tracking the status of both high-level Projects and individual Tasks (Ongoing vs. Completed).
-* **Deadline Management:** Handling date-time inputs specifically for task deadlines.
+### Why it’s Distinct
+Instead of just posting text or comments, this application is about managing state and time.
+* **It’s Hierarchical:** I had to design a database structure where Users own Projects, Projects own Tasks, and Projects also share a Many-to-Many relationship with Technologies.
+* **It’s Time-Sensitive:** Unlike a blog post that just has a timestamp, the tasks here have functional deadlines. The app has to handle datetime inputs from the user and visually flag when things are overdue.
+* **It’s a Workflow Tool:** The UI is designed to actually get work done—moving tasks from "Active" to "Completed" and dynamically updating the dashboard.
 
-### Complexity
-The application exceeds the complexity of standard problem sets through:
-1.  **Single Page Application (SPA) Features:**
-    * Task editing and status updates utilize **AJAX (Fetch API)** to communicate with the server.
-    * Users can edit a task's title and deadline inline. The form appears dynamically, saves data to the backend via a JSON API, and updates the DOM immediately without a page reload.
-    * Projects can be marked as "Completed" directly from the dashboard using asynchronous requests.
-2.  **Complex Database Relationships:**
-    * It utilizes a **Many-to-Many** relationship between `Project` and `Technology`, allowing a scalable way to tag projects with their tech stack.
-    * It uses `ForeignKey` relationships to link Tasks to Projects and Projects to Users.
-3.  **Dynamic UI/UX:**
-    * Technologies can be added dynamically via a **Bootstrap Modal** inside the "Create Project" form. This uses JavaScript to POST data to the server and immediately append the new technology to the selection dropdown without refreshing the form.
-    * Responsive design using Bootstrap 5 grid system to handle mobile (stacked) vs. desktop (sidebar) layouts.
+### Why it’s Complex
+I put a lot of effort into making the user experience smooth, which meant writing a lot of custom JavaScript and handling complex database queries.
+
+1.  **Single Page Application (SPA) Feel:**
+    I didn't want the user to have to reload the page every time they fixed a typo in a task. I used **AJAX and the Fetch API** heavily here.
+    * **Inline Editing:** When you click a task, it transforms into an editable form right on the page. I wrote JavaScript to handle the UI swap, send the data to the backend, and update the DOM without a refresh.
+    * **Dynamic Modals:** In the "Create Project" form, I added a feature to create new Technology tags on the fly. This uses a Bootstrap modal and a background Fetch request so you can add a new tag and select it immediately without losing your progress on the main form.
+
+2.  **Database Relationships:**
+    * I used a **Many-to-Many relationship** between `Project` and `Technology`. This was tricky because I wanted the technologies to be reusable tags across different projects.
+    * I also had to manage `ForeignKeys` carefully so that deleting a project cascades correctly and deletes its tasks, but doesn't mess up the User or the Technology list.
+
+3.  **Dynamic UI:**
+    * I implemented responsive design manually using Bootstrap 5. The layout shifts from a sidebar view on desktop to a stacked view on mobile.
+    * I also had to do some work on the backend to parse HTML5 datetime inputs into a format that Python's Django could save to the database.
 
 ## File Contents
 
-### `projectManager/`
-* **`models.py`**: Defines the database schema:
-    * `User`: Standard Django AbstractUser.
-    * `Technology`: A simple model to store tech stack names (e.g., "Django", "React").
-    * `Project`: Stores project metadata, links to the Creator, and has a Many-to-Many relationship with `Technology`.
-    * `Task`: Individual items linked to a Project, containing deadlines and status.
-* **`views.py`**: Contains the application logic. It includes:
-    * Standard views: `index`, `login`, `register`, `home`, `create_project`.
-    * **API views**: `edit_task`, `mark_task_complete`, `add_technology`, `mark_project_complete`, `add_task`. These return `JsonResponse` objects for the JavaScript frontend to consume.
-* **`urls.py`**: Defines the URL patterns, including distinct paths for the API endpoints used by the frontend scripts.
-* **`forms.py`**: Contains `ModelForm` definitions (`ProjectForm`, `TaskForm`, `TechnologyForm`, `RegistrationForm`) with custom widgets to apply Bootstrap styling and DatePickers.
+Here is a breakdown of the files I created and the code inside them:
+
+### `projectManager/` (The Django App)
+* **`models.py`**: This is where I defined the database schema.
+    * `User`: Inherits from `AbstractUser`.
+    * `Technology`: A simple model to store tech names (like "Django") so they can be reused.
+    * `Project`: The main model. It links to the User and has the Many-to-Many link to Technologies.
+    * `Task`: Stores the specific to-do items, deadlines, and completion status (`boolean`).
+* **`views.py`**: I split my views into two types:
+    * **Standard Views:** `index`, `home`, `create_project`, etc. These render the HTML templates.
+    * **API Views:** `edit_task`, `mark_task_complete`, `add_technology`, `add_task`. These are special functions I wrote specifically to return `JsonResponse` objects. My JavaScript files talk to these views to update data without reloading the page.
+* **`urls.py`**: I defined all my paths here. I made sure to separate the API paths (like `edit_task/`) from the regular page paths.
+* **`forms.py`**: I used Django’s `ModelForm` for the Projects and Tasks. I added custom widgets here to make them look good with Bootstrap, specifically adding the `type="datetime-local"` widget for the deadline input.
 
 ### `projectManager/static/projectManager/`
-* **`scripts.js`**: The core JavaScript file containing the logic for:
-    * `markTaskComplete()`: Sends async POST requests to update task status.
-    * `toggleEdit()`: Toggles the visibility of the edit form vs. the display text.
-    * `saveTask()`: Handles the submission of the edit form via AJAX, updates the DOM with new data, and closes the form.
-    * `markProjectComplete()`: Handles project status updates.
-* **`styles.css`**: Custom CSS overrides for the application, including specific styling for the "technology tags" and custom scrollbars for the task list.
+* **`scripts.js`**: This contains all the frontend logic I wrote.
+    * `markTaskComplete(id)`: Sends a POST request to toggle the task status and strikes through the text instantly.
+    * `toggleEdit(id)`: Hides the text and shows the form for inline editing.
+    * `saveTask(id)`: This is the big one—it gathers the data from the inputs, sends it to the API, waits for the response, and then updates the HTML to show the new task info.
+    * `markProjectComplete()`: Handles the project status updates from the dashboard.
+* **`styles.css`**: I added my custom styling here, like the specific colors for the technology "pills," the scrollbar styling for the task list, and the hover effects for the buttons.
 
 ### `projectManager/templates/projectManager/`
-* **`layout.html`**: The base template containing the HTML structure, Bootstrap CDN links, and the navigation block.
-* **`index.html`**: The landing page for unauthenticated users.
-* **`home.html`**: The user's dashboard displaying a grid of their active and completed projects.
-* **`project.html`**: The main detail view. It features a responsive layout with project details on the left (or top) and a scrollable task list on the right (or bottom). It includes hidden forms for editing tasks that are toggled via JS and a modal for adding new tasks.
-* **`create_project.html` / `edit_project.html`**: Forms for project management. These include a dynamic Modal for adding new technologies on the fly.
-* **`login.html` / `register.html`**: Authentication templates.
+* **`layout.html`**: My base template. It has the navbar (which changes if you are logged in or out) and the footer.
+* **`index.html`**: The landing page for people who haven't logged in yet.
+* **`home.html`**: The main dashboard. It loops through the user's projects and displays them in a grid.
+* **`project.html`**: This is the detail view. It shows the project info on one side and the task list on the other. This is where the complex template logic is, including the hidden forms for editing tasks.
+* **`create_project.html`**: The form to start a new project. It includes the modal I mentioned earlier for adding new technologies.
+* **`login.html` / `register.html`**: The standard auth forms, styled with Bootstrap.
 
 ## How to Run
 
 1.  **Install Dependencies:**
-    If you have a virtual environment, activate it. Then install Django:
     ```bash
     pip install -r requirements.txt
     ```
 
-2.  **Apply Migrations:**
-    Set up the database schema:
+2.  **Make Migrations:**
     ```bash
     python manage.py makemigrations
     python manage.py migrate
     ```
 
 3.  **Run the Server:**
-    Start the development server:
     ```bash
     python manage.py runserver
     ```
 
-4.  **Access the App:**
-    Open your browser and navigate to `http://127.0.0.1:8000`. Register a new account to get started.
+4.  **Visit the App:**
+    Go to `http://127.0.0.1:8000` in your browser.
